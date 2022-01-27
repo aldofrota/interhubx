@@ -2,20 +2,23 @@
   <div class="main--clientes">
     <div class="titulo">
       <span>Clientes</span>
+      
       <div class="novo--cliente">
 
         <b-button @click="modalShow = !modalShow"> + </b-button>
 
-        <b-modal v-model="modalShow" hide-header hide-footer>
+        <b-modal v-model="modalShow" hide-header hide-footer size="sm">
           <div class="conteudo--modal">
             <span>Cadastrar novo cliente:</span>
-            <div class="input-container">
-              <label class="label" for="nome">Cliente:</label>
-              <input class="input" type="text" v-model="cliente.nome" id="nome" placeholder="Digite o nome do cliente" pattern=".+" required >
-            </div>
-            <div class="btn--salvar">
-              <button @click="novoCliente()"><b-icon class="icone" icon="file-earmark-arrow-up-fill"/>Salvar</button>
-            </div>
+            <form @submit.prevent="novoCliente">
+              <div class="input-container">
+                <label class="label" for="nome">Cliente:</label>
+                <input class="input" type="text" v-model="cliente.nome" id="nome" placeholder="Digite o nome do cliente" required >
+              </div>
+              <div class="btn--salvar">
+                <button><b-icon class="icone" icon="file-earmark-arrow-up-fill"/>Salvar</button>
+              </div>
+            </form>
           </div>
         </b-modal>
 
@@ -36,34 +39,43 @@ export default {
   
   data() {
     return {
+
       modalShow: false,
 
       cliente: {
         nome: ''
       },
 
-      clientes:''
+      clientes:[]
     }
   },
   
   methods: {
 
-    async novoCliente() {
-      this.$axios.$post('registrocliente', {
-        nome: this.cliente.nome
+    async listarClientes() {
+      const response = await this.$axios.get('clientes').then(response => {
+        this.clientes = response.data
+      }).catch(erro => {
+        console.log(erro)
       })
-      
     },
-    
-  },
 
-  async mounted() {
-    const response = await this.$axios.get('clientes').then(response => {
-      this.clientes = response.data
-      console.log(this.clientes)
-    }).catch(erro => {
-      console.log(erro)
-    })
+    async novoCliente() {
+      if(this.cliente.nome != '') {
+        await this.$axios.post('registrocliente', { nome: this.cliente.nome});
+        this.listarClientes()
+        this.cliente.nome = '';
+        this.modalShow = !this.modalShow;
+      } else {
+        return
+      }
+    },    
+  },
+  
+  mounted() {
+
+    this.listarClientes()
+    
   }
 }
 
@@ -89,6 +101,20 @@ export default {
     background-color: #f5f5f5;
     color: #252525;
   }
+  .titulo span {
+    width: 95%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .titulo .novo--cliente {
+    width: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
   .lista--clientes {
     width: 95%;
     margin-top: 10px;
@@ -96,8 +122,9 @@ export default {
   .lista--clientes .item {
     padding: 10px;
     border-radius: 10px;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 3px solid #f5f5f5;
     cursor: pointer;
+    transition: all 0.5s;
   }
   .lista--clientes .item:hover {
     background-color: #f5f5f5;
@@ -126,7 +153,7 @@ export default {
   }
   .input-container input {
     height: 35px;
-    width: 60%;
+    width: 90%;
     padding: 10px;
     border-radius: 10px;
     border: 1px solid #252525;

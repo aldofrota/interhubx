@@ -6,27 +6,27 @@
     <b-tabs class="tabs mt-2" content-class="mt-3" small pills justified>
       <b-tab active>
         <template class="aba" #title>
-          <b-icon class="icone" icon="clipboard-data"/>Painel
+          <b-icon class="icone" icon="clipboard-data"/><span class="nome">Painel</span>
         </template>
         <Painel/>
       </b-tab>
       <b-tab>
         <template #title>
-          <b-icon class="icone" icon="building"/>Clientes
+          <b-icon class="icone" icon="file-earmark-fill"/><span class="nome">Ordens</span>
+        </template>
+        <Ordens/>
+      </b-tab>
+      <b-tab>
+        <template #title>
+          <b-icon class="icone" icon="building"/><span class="nome">Clientes</span>
         </template>
         <Clientes/>
       </b-tab>
       <b-tab>
         <template #title>
-          <b-icon class="icone" icon="person-fill"/>Colaboradores
+          <b-icon class="icone" icon="person-fill"/><span class="nome">Colaboradores</span>
         </template>
         <Colaboradores/>
-      </b-tab>
-      <b-tab>
-        <template #title>
-          <b-icon class="icone" icon="file-earmark-fill"/>Ordens
-        </template>
-        <Ordens/>
       </b-tab>
     </b-tabs>
   </div>
@@ -66,6 +66,9 @@ export default {
 </script>
 
 <style>
+  *, *:before, *:after {
+    box-sizing: border-box;
+  }
 
   .tabs {
     width: 100%;
@@ -82,6 +85,13 @@ export default {
   }
   a:hover {
     color: #555555;
+  }
+
+  @media only screen and (max-width: 580px) {
+    
+    .nome {
+      display: none;
+    }
   }
 
 </style>

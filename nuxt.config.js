@@ -35,8 +35,18 @@ export default {
     '@nuxtjs/pwa',
   ],
   bootstrapVue: {
-    components: [],
-    componentPlugins: ['IconsPlugin', 'FormPlugin', 'FormGroupPlugin', 'FormInputPlugin', 'ButtonPlugin']
+    componentPlugins: [
+      'IconsPlugin',
+      'FormPlugin',
+      'FormGroupPlugin',
+      'FormInputPlugin',
+      'ButtonPlugin',
+      'ToastPlugin',
+      'NavbarPlugin',
+      'AvatarPlugin',
+      'TabsPlugin',
+      'ModalPlugin'
+    ]
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios

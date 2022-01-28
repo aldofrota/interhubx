@@ -1,26 +1,29 @@
 <template>
   <div class="main--ordens">
     <div class="filtros">
-      <select  id="colaborador">
+      <select v-model="filtro.colaborador" id="colaborador">
         <option value="" selected>Colaboradores</option>
         <option v-for="colaborador in colaboradores" :key="colaborador.id" :value="colaborador.nome">{{ colaborador.nome }}</option>
       </select>
-      <select id="cliente">
+      <select v-model="filtro.cliente" id="cliente">
         <option value="" selected>Clientes</option>
         <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.nome">{{ cliente.nome }}</option>
       </select>
-      <select id="status">
+      <select v-model="filtro.status" id="status">
         <option value="" selected>Status</option>
         <option value="Aberto" selected>Aberto</option>
         <option value="Finalizado" selected>Finalizado</option>
       </select>
     </div>
+    {{ filtro.colaborador }}
+    {{ filtro.cliente }}
+    {{ filtro.status }}
     <div class="lista--ordens"> 
-      <div class="ordem" v-for="ordem in ordens" :key="ordem.id">
+      <div class="ordem" v-for="ordem in filtroOrdens" :key="ordem.id">
 
         <div class="titulo--ordem"><span>{{ ordem.titulo }}</span></div>
 
-        <div class="colaborador--ordem"><span>Responsavel: </span><i>{{ ordem.colaborador }}</i></div>
+        <div class="colaborador--ordem"><span>Colaborador: </span><i>{{ ordem.colaborador }}</i></div>
 
         <div class="cliente--ordem"><span>Cliente:</span><i>{{ ordem.cliente }}</i></div>
 
@@ -28,7 +31,7 @@
 
 
         <div class="footer--ordem">
-          <div class="data--ordem">{{ ordem.createdAt.split('-') }}</div>
+          <div class="data--ordem">{{ ordem.data }}</div>
 
           <b-button class="btn--ordem" @click="modalDetalhes = !modalDetalhes"> + detalhes </b-button>
           <b-modal v-model="modalDetalhes" hide-header hide-footer size="sm">
@@ -44,7 +47,12 @@
         </div>
       </div>
     </div>
-
+    <div
+      v-b-popover.hover.top="'Adicionar nova ordem de serviço'"
+      class="flutuante"
+      @click="modalAdicionar = !modalAdicionar">
+      <span class="material-icons"> add_box </span>
+    </div>
     <div>
       <b-modal v-model="modalAdicionar" hide-header hide-footer size="sm">
         <div class="conteudo--modal">
@@ -59,12 +67,15 @@
               <input class="input" type="textarea" v-model="ordem.descricao" id="descricao" placeholder="Digite a descrição da ordem de serviço" required >
             </div>
             <div class="input-container">
-              <label class="label" for="perfil">Perfil:</label>
-              <b-form-select v-model="selected" :options="options" required></b-form-select>
+              <label class="label" for="colaborador">Colaborador:</label>
+              <select v-model="ordem.colaborador" id="colaborador">
+                <option :value="null" selected disabled required>--Selecione--</option>
+                <option v-for="colaborador in colaboradores" :key="colaborador.id" :value="colaborador.nome">{{colaborador.nome}}</option>
+              </select>
             </div>
             <div class="input-container">
-              <label class="label" for="perfil">Perfil:</label>
-              <b-form-select v-model="selected" :options="options" required></b-form-select>
+              <label class="label" for="cliente">Cliente:</label>
+              <select id="perfil"></select>
             </div>
             
             <div class="btn--salvar">
@@ -90,28 +101,23 @@ export default {
       modalDetalhes: false,
       modalAdicionar: false,
 
-      ordem: {
+      filtro: {
         colaborador: '',
         cliente: '',
         status: ''
+      },
+
+      ordem: {
+        titulo: '',
+        descricao: '',
+        colaborador: '',
+        cliente: '',
       },
 
       ordens:[],
       colaboradores:[],
       clientes:[],
 
-      bgColor: '#252525',
-      position: 'botton-right',
-      fabActions: [
-          {
-              name: 'atualizar',
-              icon: 'cached'
-          },
-          {
-              name: 'adicionar',
-              icon: 'note_add'
-          }
-      ]
     }
   },
 
@@ -181,6 +187,38 @@ export default {
     this.listarColaboradores()
     this.listarClientes()
     
+  },
+
+  computed: {
+
+    filtroOrdens() {
+
+      let valores = []
+
+      // Filtro de Ordens de serviço pelo colaborador
+      valores = this.ordens.filter((item) => {
+        if (this.filtro.colaborador === null || this.filtro.colaborador.length === 0) { return item }
+
+        return item.colaborador.toLowerCase() === this.filtro.colaborador.toLowerCase()
+      })
+
+      // Filtro de ordens de serviço pelo cliente
+      valores = this.ordens.filter((item) => {
+        if (this.filtro.cliente === null || this.filtro.cliente.length === 0) { return item }
+        
+        return item.cliente.toLowerCase() === this.filtro.cliente.toLowerCase()
+      })
+
+      // Filtro de ordens de serviço pelo status
+      valores = this.ordens.filter((item) => {
+        if (this.filtro.status === null || this.filtro.status.length === 0) { return item }
+        
+        console.log(item.status)
+        return item.status.toLowerCase() === this.filtro.status.toLowerCase()
+      })
+
+      return valores;
+    }
   }
 }
 </script>
@@ -220,8 +258,8 @@ export default {
     width: 300px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: flex-start;
+    justify-content: space-between;
     padding: 10px;
     margin: 10px 20px 40px 10px;
     border-radius: 5px;
@@ -288,6 +326,65 @@ export default {
     margin-right: 5px;
   }
 
+  .flutuante {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+    height: 40px;
+    width: 40px;
+  }
+  .flutuante span {
+    font-size: 50px;
+    transition: all 0.5s;
+    background-color: #f5f5f5;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .flutuante span:hover {
+    transform: scale(1.2);
+  }
+
+
+  @media only screen and (max-width: 280px) {
+    .lista--ordens .ordem {
+      width: 95%;
+    }
+    .titulo--ordem {
+      font-size: 17px;
+    }
+    .colaborador--ordem {
+      font-size: 14px;
+    }
+    .cliente--ordem {
+      font-size: 14px;
+    }
+    .status--ordem {
+      font-size: 14px;
+    }
+
+    .flutuante span {
+      height: 30px;
+      width: 30px;
+    }	
+  }
+
+  @media only screen and (max-width: 360px) {
+    .filtros select {
+      width: 25%;
+      margin: 0;
+    }
+    .flutuante span {
+      height: 20px;
+      width: 20px;
+      font-size: 30px;
+    }
+  }
+
   @media only screen and (max-width: 700px) {
 
     .lista--ordens .ordem {
@@ -306,11 +403,10 @@ export default {
       width: 30%;
       margin: 0;
     }
-  }
-  @media only screen and (max-width: 360px) {
-    .filtros select {
-      width: 25%;
-      margin: 0;
+    .flutuante span {
+      height: 30px;
+      width: 30px;
+      font-size: 40px;
     }
   }
 </style>

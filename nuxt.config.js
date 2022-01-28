@@ -47,7 +47,6 @@ export default {
       'TabsPlugin',
       'ModalPlugin',
       'FormSelectPlugin',
-      'PaginationPlugin'
     ]
   },
 

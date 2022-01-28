@@ -16,12 +16,12 @@
                 <input class="input" type="text" v-model="colaborador.nome" id="nome" placeholder="Digite o nome do colaborador" required >
               </div>
               <div class="input-container">
-                <label class="label" for="nome">Email:</label>
-                <input class="input" type="text" v-model="colaborador.email" id="nome" placeholder="Digite o email do novo colaborador" required >
+                <label class="label" for="email">Email:</label>
+                <input class="input" type="text" v-model="colaborador.email" id="email" placeholder="Digite o email do novo colaborador" required >
               </div>
               <div class="input-container">
-                <label class="label" for="nome">Senha:</label>
-                <input class="input" type="password" v-model="colaborador.senha" id="nome" placeholder="Digite a senha do novo colaborador" required >
+                <label class="label" for="password">Senha:</label>
+                <input class="input" type="password" v-model="colaborador.senha" id="password" placeholder="Digite a senha do novo colaborador" required >
               </div>
               <div class="input-container">
                 <label class="label" for="perfil">Perfil:</label>

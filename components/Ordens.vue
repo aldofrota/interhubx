@@ -44,40 +44,36 @@
         </div>
       </div>
     </div>
-    <fab
-      :position="position"
-      :bg-color="bgColor" 
-      :actions="fabActions"
-      @atualizar="listarOrdens"
-      @adicionar="modalAdicionar = !modalAdicionar"
-    ></fab>
-    <b-modal v-model="modalAdicionar" hide-header hide-footer size="sm">
-      <div class="conteudo--modal">
-        <span>Cadastrar nova ordem:</span>
-        <form @submit.prevent="novocolaborador">
-          <div class="input-container">
-            <label class="label" for="nome">Titulo:</label>
-            <input class="input" type="text" v-model="ordem.titulo" id="titulo" placeholder="Digite o titulo da ordem de serviço" required >
-          </div>
-          <div class="input-container">
-            <label class="label" for="descricao">Descrição:</label>
-            <input class="input" type="textarea" v-model="ordem.descricao" id="descricao" placeholder="Digite a descrição da ordem de serviço" required >
-          </div>
-          <div class="input-container">
-            <label class="label" for="perfil">Perfil:</label>
-            <b-form-select v-model="selected" :options="options" required></b-form-select>
-          </div>
-          <div class="input-container">
-            <label class="label" for="perfil">Perfil:</label>
-            <b-form-select v-model="selected" :options="options" required></b-form-select>
-          </div>
-          
-          <div class="btn--salvar">
-            <button><b-icon class="icone" icon="file-earmark-arrow-up-fill"/>Salvar</button>
-          </div>
-        </form>
-      </div>
-    </b-modal>
+
+    <div>
+      <b-modal v-model="modalAdicionar" hide-header hide-footer size="sm">
+        <div class="conteudo--modal">
+          <span>Cadastrar nova ordem:</span>
+          <form @submit.prevent="novocolaborador">
+            <div class="input-container">
+              <label class="label" for="nome">Titulo:</label>
+              <input class="input" type="text" v-model="ordem.titulo" id="titulo" placeholder="Digite o titulo da ordem de serviço" required >
+            </div>
+            <div class="input-container">
+              <label class="label" for="descricao">Descrição:</label>
+              <input class="input" type="textarea" v-model="ordem.descricao" id="descricao" placeholder="Digite a descrição da ordem de serviço" required >
+            </div>
+            <div class="input-container">
+              <label class="label" for="perfil">Perfil:</label>
+              <b-form-select v-model="selected" :options="options" required></b-form-select>
+            </div>
+            <div class="input-container">
+              <label class="label" for="perfil">Perfil:</label>
+              <b-form-select v-model="selected" :options="options" required></b-form-select>
+            </div>
+            
+            <div class="btn--salvar">
+              <button><b-icon class="icone" icon="file-earmark-arrow-up-fill"/>Salvar</button>
+            </div>
+          </form>
+        </div>
+      </b-modal>
+    </div>
   </div>
 </template>
 

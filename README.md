@@ -1,4 +1,4 @@
-# web-app
+# Interhubx
 
 ## Build Setup
 

@@ -1,23 +1,30 @@
 <template>
   <div class="main--ordens">
-    <div class="filtros">
-      <select v-model="filtro.colaborador" id="colaborador">
-        <option value="" selected>Colaboradores</option>
-        <option v-for="colaborador in colaboradores" :key="colaborador.id" :value="colaborador.nome">{{ colaborador.nome }}</option>
-      </select>
-      <select v-model="filtro.cliente" id="cliente">
-        <option value="" selected>Clientes</option>
-        <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.nome">{{ cliente.nome }}</option>
-      </select>
-      <select v-model="filtro.status" id="status">
-        <option value="" selected>Status</option>
-        <option value="Aberto" selected>Aberto</option>
-        <option value="Finalizado" selected>Finalizado</option>
-      </select>
+    <!-- Div com os elementos de filtro -->
+    <div class="busca">
+      <div class="filtros">
+        <select v-model="filtro.colaborador" id="colaborador">
+          <option value="" selected>Colaboradores</option>
+          <option v-for="colaborador in colaboradores" :key="colaborador.id" :value="colaborador.nome">{{ colaborador.nome }}</option>
+        </select>
+        <select v-model="filtro.cliente" id="cliente">
+          <option value="" selected>Clientes</option>
+          <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.nome">{{ cliente.nome }}</option>
+        </select>
+        <select v-model="filtro.status" id="status">
+          <option value="" selected>Status</option>
+          <option value="Aberta" selected>Aberta</option>
+          <option value="Finalizada" selected>Finalizada</option>
+        </select>
+      </div>
+      <div class="ordenacao">
+        <b-button class="button" @click="cliente(ordenaCliente = !ordenaCliente)"><span class="material-icons">unfold_more</span>Cliente</b-button>
+        <b-button class="button" @click="colaborador(ordenaColaborador = !ordenaColaborador)"><span class="material-icons">unfold_more</span>Colaborador</b-button>
+        <b-button class="button" @click="data(ordenaData = !ordenaData)"><span class="material-icons">unfold_more</span>Data</b-button>
+      </div>
     </div>
-    {{ filtro.colaborador }}
-    {{ filtro.cliente }}
-    {{ filtro.status }}
+
+    <!-- Div onde fica os elementos dos cards listados -->
     <div class="lista--ordens"> 
       <div class="ordem" v-for="ordem in filtroOrdens" :key="ordem.id">
 
@@ -31,57 +38,69 @@
 
 
         <div class="footer--ordem">
-          <div class="data--ordem">{{ ordem.data }}</div>
+          <div class="data--ordem"><span>Aberta em </span>{{ ordem.data }}</div>
 
+          <!-- Modal de descrição os elementos -->
           <b-button class="btn--ordem" @click="modalDetalhes = !modalDetalhes"> + detalhes </b-button>
-          <b-modal v-model="modalDetalhes" hide-header hide-footer size="sm">
-            <span class="descricao--ordem">Descrição</span>
+          <b-modal v-model="modalDetalhes" hide-header hide-footer size="sm"  no-close-on-backdrop>
 
-            <div>{{ ordem.descricao }}</div>
-            
-            <div class="footer--modal">
-              <b-button @click="modalDetalhes = !modalDetalhes"> Fechar </b-button>
-              <span @click="finalizar">Finalizar</span>
-            </div>
+              <span class="descricao--ordem">Descrição</span>
+
+              <div>{{ ordem.descricao }}</div>
+              
+              <div class="footer--modal">
+                <b-button @click="modalDetalhes = !modalDetalhes"> Fechar </b-button>
+                <span @click="finalizar">Finalizar</span>
+              </div>
           </b-modal>
         </div>
       </div>
     </div>
+
+    <!-- Div onde fica o botão flutuante -->
     <div
       v-b-popover.hover.top="'Adicionar nova ordem de serviço'"
       class="flutuante"
       @click="modalAdicionar = !modalAdicionar">
       <span class="material-icons"> add_box </span>
     </div>
+
+    <!-- Modal de adicionar nova ordem -->
     <div>
-      <b-modal v-model="modalAdicionar" hide-header hide-footer size="sm">
+      <b-modal v-model="modalAdicionar" hide-header hide-footer size="sm" no-close-on-backdrop>
         <div class="conteudo--modal">
-          <span>Cadastrar nova ordem:</span>
-          <form @submit.prevent="novocolaborador">
+          <div class="titulo--modal">
+            <span>Cadastrar nova ordem</span>
+            <span class="btn--fechar material-icons" @click="modalAdicionar = !modalAdicionar; limparForm()">close</span>
+          </div>
+          <b-form @submit="novaOrdem">
             <div class="input-container">
-              <label class="label" for="nome">Titulo:</label>
-              <input class="input" type="text" v-model="ordem.titulo" id="titulo" placeholder="Digite o titulo da ordem de serviço" required >
+              <label for="nome">Titulo:</label>
+              <input type="text" v-model="ordem.titulo" id="titulo" placeholder="Digite o titulo da ordem de serviço" required >
             </div>
             <div class="input-container">
-              <label class="label" for="descricao">Descrição:</label>
-              <input class="input" type="textarea" v-model="ordem.descricao" id="descricao" placeholder="Digite a descrição da ordem de serviço" required >
+              <label for="descricao">Descrição:</label>
+              <textarea v-model="ordem.descricao" id="descricao" placeholder="Digite a descrição da ordem de serviço" required wrap="hard"/>
             </div>
             <div class="input-container">
-              <label class="label" for="colaborador">Colaborador:</label>
-              <select v-model="ordem.colaborador" id="colaborador">
-                <option :value="null" selected disabled required>--Selecione--</option>
+              <label for="colaborador">Colaborador:</label>
+              <select v-model="ordem.colaborador" id="colaborador" required>
+                <option value="" disabled selected>--Selecione--</option>
                 <option v-for="colaborador in colaboradores" :key="colaborador.id" :value="colaborador.nome">{{colaborador.nome}}</option>
               </select>
             </div>
             <div class="input-container">
-              <label class="label" for="cliente">Cliente:</label>
-              <select id="perfil"></select>
+              <label for="cliente">Cliente:</label>
+              <select v-model="ordem.cliente" id="perfil" required>
+                <option value="" disabled selected>--Selecione--</option>
+                <option v-for="cliente in clientes" :key="cliente.id" :value="cliente.nome">{{cliente.nome}}</option>
+              </select>
             </div>
             
             <div class="btn--salvar">
-              <button><b-icon class="icone" icon="file-earmark-arrow-up-fill"/>Salvar</button>
+              <b-button type="submit" ><b-icon class="icone" icon="file-earmark-arrow-up-fill"/>Salvar</b-button>
             </div>
-          </form>
+          </b-form>
         </div>
       </b-modal>
     </div>
@@ -98,15 +117,21 @@ export default {
   data() {
     return {
 
-      modalDetalhes: false,
-      modalAdicionar: false,
+      ordenaCliente: false,      //método para ordenar por cliente
+      ordenaColaborador: false, //método para fazer a ordenação por colaborador
+      ordenaData: false,       // método para fazer a ordenação pela data
 
+      modalDetalhes: false,   //modal de detalhes
+      modalAdicionar: false, //modal de adicionar novas ordens
+
+      // Objeto que ultilazara para filtrar os dados
       filtro: {
         colaborador: '',
         cliente: '',
         status: ''
       },
 
+      // Objeto que será enviado para o servidor para cadastrar nova ordem
       ordem: {
         titulo: '',
         descricao: '',
@@ -114,6 +139,7 @@ export default {
         cliente: '',
       },
 
+      // Array de objetos que carrega os dados do banco
       ordens:[],
       colaboradores:[],
       clientes:[],
@@ -123,17 +149,94 @@ export default {
 
   methods: {
 
+    // Função para limpar o formulário de cadastro de novas ordens
+    limparForm() {
+      this.ordem.titulo = '';
+      this.ordem.descricao = '';
+      this.ordem.colaborador = '';
+      this.ordem.cliente = '';
+    },
+
+    // Função para finalizar uma ordem de serviço
     finalizar() {
       this.modalShow = !this.modalShow;
     },
 
+    // Função para ordenação dos dados pelo nome do cliente
+    cliente() {
+      if(this.ordenaCliente) {
+        this.ordens = this.ordens.sort((a, b) => {
+          if(a.cliente > b.cliente) {
+            return -1
+          }else {
+            return true
+          }
+        })
+      } else {
+        this.ordens = this.ordens.sort((a, b) => {
+          if(a.cliente < b.cliente) {
+            return -1
+          }else {
+            return true
+          }
+        })
+      } 
+    },
+
+    // Função para ordenação dos dados pelo nome do colaborador
+    colaborador() {
+      if(this.ordenaColaborador) {
+        this.ordens = this.ordens.sort((a, b) => {
+          if(a.colaborador > b.colaborador) 
+            return -1
+          if(a.colaborador < b.colaborador)
+            return 1
+          return 0
+        })
+      } else {
+        this.ordens = this.ordens.sort((a, b) => {
+          if(a.colaborador < b.colaborador) 
+            return -1
+          if (a.colaborador > b.colaborador)
+            return 1
+          return 0
+        })
+      }
+    },
+
+    // Função para ordenação dos dados pela data
+    data() {
+      if(this.ordenaData) {
+        this.ordens = this.ordens.sort((a, b) => {
+          if(a.data > b.data) {
+            return -1
+          }else {
+            return true
+          }
+        })
+      } else {
+        this.ordens = this.ordens.sort((a, b) => {
+          if(a.data < b.data) {
+            return -1
+          }else {
+            return true
+          }
+        })
+      } 
+    },
+
+    // Função para fazer a busca e listar as ordens de serviços do banco
     async listarOrdens() {
       const response = await this.$axios.get('ordens').then(response => {
+
         this.ordens = response.data
+
       }).catch(erro => {
         console.log(erro)
       });
     },
+
+    // Função para fazer a busca e listar os colaboradores cadastrados no banco
     async listarColaboradores() {
       const response = await this.$axios.get('colaboradores').then(response => {
         this.colaboradores = response.data
@@ -141,6 +244,8 @@ export default {
         console.log(erro)
       });
     },
+
+    // Função para fazer a busca e listar os clientes cadastrados no banco
     async listarClientes() {
       const response = await this.$axios.get('clientes').then(response => {
         this.clientes = response.data
@@ -149,22 +254,23 @@ export default {
       });
     },
 
-    async novaOrdem() {
+    // Função que faz o post no banco de dados com os dados do formulário de cadastro de novas ordens
+    async novaOrdem(event) {
+      event.preventDefault()
+
       if(this.ordem.titulo != '') {
         await this.$axios.post('registroordem', {
 
           titulo: this.ordem.titulo,
           descricao: this.ordem.descricao,
           colaborador: this.ordem.colaborador,
-          cliente: this.ordem.cliente
+          cliente: this.ordem.cliente,
+          status: 'Aberta',
 
         })
 
         this.listarOrdens()
-        this.ordem.titulo = ''
-        this.ordem.descricao = ''
-        this.ordem.colaborador = ''
-        this.ordem.cliente = ''
+        this.limparForm()
 
         this.$bvToast.toast('Ordem cadastrada com sucesso', {
           title: 'Usuário cadastrado',
@@ -178,7 +284,8 @@ export default {
       } else {
         return
       }
-    },    
+    },
+      
   },
   
   mounted() {
@@ -191,33 +298,30 @@ export default {
 
   computed: {
 
+    // Método para fazer o filtro dos registros de Ordem de Serviço
     filtroOrdens() {
 
       let valores = []
 
-      // Filtro de Ordens de serviço pelo colaborador
       valores = this.ordens.filter((item) => {
-        if (this.filtro.colaborador === null || this.filtro.colaborador.length === 0) { return item }
+        if(this.filtro.colaborador === ''){ return item }
 
-        return item.colaborador.toLowerCase() === this.filtro.colaborador.toLowerCase()
+        return item.colaborador === this.filtro.colaborador
       })
 
-      // Filtro de ordens de serviço pelo cliente
-      valores = this.ordens.filter((item) => {
-        if (this.filtro.cliente === null || this.filtro.cliente.length === 0) { return item }
-        
-        return item.cliente.toLowerCase() === this.filtro.cliente.toLowerCase()
+      valores = valores.filter((item) => {
+        if(this.filtro.cliente === ''){ return item }
+
+        return item.cliente === this.filtro.cliente
       })
 
-      // Filtro de ordens de serviço pelo status
-      valores = this.ordens.filter((item) => {
-        if (this.filtro.status === null || this.filtro.status.length === 0) { return item }
-        
-        console.log(item.status)
-        return item.status.toLowerCase() === this.filtro.status.toLowerCase()
-      })
+      valores = valores.filter((item) => {
+        if(this.filtro.status === ''){ return item }
 
-      return valores;
+        return item.status === this.filtro.status
+      })
+      
+      return valores
     }
   }
 }
@@ -233,9 +337,16 @@ export default {
     justify-content: center;
     margin-top: 20px;
     padding-top: 20px;
+    -webkit-touch-callout: none;  /* iPhone OS, Safari */
+    -webkit-user-select: none;    /* Chrome, Safari 3 */
+    -khtml-user-select: none;     /* Safari 2 */
+    -moz-user-select: none;       /* Firefox */
+    -ms-user-select: none;        /* IE10+ */
+    user-select: none;            /* Possível implementação no futuro */
+    cursor: default;
   }
 
-  .filtros {
+  .busca {
     display: flex;
   }
   .filtros select {
@@ -245,8 +356,27 @@ export default {
     border-radius: 5px;
     border: 1px solid #b3aeae;
   }
+  .ordenacao {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .ordenacao .button {
+    height: 30px;
+    padding: 0 5px 0 0;
+    display: flex;
+    margin-right: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+  .ordenacao .button span {
+    font-size: 17px;
+    font-weight: bold;
+  }
 
 
+  /* Css dos cards de Ordem de serviço */
   .lista--ordens{
     margin-top: 20px;
     display: flex;
@@ -318,6 +448,11 @@ export default {
   .footer--ordem .data--ordem {
     font-size: 12px;
   }
+  .footer--ordem .data--ordem span {
+    color: #252525;
+    font-weight: bold;
+    margin-right: 10px;
+  }
   .footer--ordem .btn--ordem {
     height: 30px;
     width: 70px;
@@ -326,6 +461,79 @@ export default {
     margin-right: 5px;
   }
 
+  /* Css do modal de adicionar uma nova ordem */
+  .conteudo--modal {
+    -webkit-touch-callout: none;  /* iPhone OS, Safari */
+    -webkit-user-select: none;    /* Chrome, Safari 3 */
+    -khtml-user-select: none;     /* Safari 2 */
+    -moz-user-select: none;       /* Firefox */
+    -ms-user-select: none;        /* IE10+ */
+    user-select: none;            /* Possível implementação no futuro */
+    cursor: default;
+  }
+  .conteudo--modal .titulo--modal {
+    display: flex;
+    justify-content: space-between;
+  }
+  .conteudo--modal .titulo--modal span {
+    font-weight: bold;
+    color: #252525;
+    cursor: default;
+  }
+  .conteudo--modal .titulo--modal .btn--fechar {
+    cursor: pointer;
+  }
+
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  .input-container label {
+    font-weight: 500;
+  }
+  .input-container input {
+    border: 1px solid #b3aeae;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 10px;
+  }
+  .input-container select {
+    border: 1px solid #b3aeae;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 10px;
+  }
+  .input-container textarea {
+    height: 150px;
+    border: 1px solid #b3aeae;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 10px;
+    resize: none;
+  }
+  .input-container textarea::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .input-container textarea::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+
+  .input-container textarea::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #252525;
+    border-radius: 20px;
+  }
+  
+  .conteudo--modal .btn--salvar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+
+  /* Css do botão flutuante na tela */
   .flutuante {
     position: fixed;
     bottom: 20px;
@@ -350,19 +558,33 @@ export default {
   }
 
 
+  /* Css que faz a responsividade dos itens do componente */
   @media only screen and (max-width: 280px) {
+
+    .busca {
+      flex-direction: column;
+    }
+
+    .ordenacao {
+      margin-top: 10px;
+    }
+
     .lista--ordens .ordem {
       width: 95%;
     }
+
     .titulo--ordem {
       font-size: 17px;
     }
+
     .colaborador--ordem {
       font-size: 14px;
     }
+
     .cliente--ordem {
       font-size: 14px;
     }
+
     .status--ordem {
       font-size: 14px;
     }
@@ -374,10 +596,20 @@ export default {
   }
 
   @media only screen and (max-width: 360px) {
+
+    .busca {
+      flex-direction: column;
+    }
+
+    .ordenacao {
+      margin-top: 10px;
+    }
+
     .filtros select {
       width: 25%;
       margin: 0;
     }
+
     .flutuante span {
       height: 20px;
       width: 20px;
@@ -386,6 +618,14 @@ export default {
   }
 
   @media only screen and (max-width: 700px) {
+
+    .busca {
+      flex-direction: column;
+    }
+
+    .ordenacao {
+      margin-top: 10px;
+    }
 
     .lista--ordens .ordem {
       height: 180px;

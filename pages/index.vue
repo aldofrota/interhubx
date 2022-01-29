@@ -12,7 +12,7 @@
       </b-tab>
       <b-tab>
         <template #title>
-          <b-icon class="icone" icon="file-earmark-fill"/><span class="nome">Ordens</span>
+          <b-icon class="icone" icon="file-earmark"/><span class="nome">Ordens</span>
         </template>
         <Ordens/>
       </b-tab>
@@ -24,7 +24,7 @@
       </b-tab>
       <b-tab>
         <template #title>
-          <b-icon class="icone" icon="person-fill"/><span class="nome">Colaboradores</span>
+          <b-icon class="icone" icon="person"/><span class="nome">Colaboradores</span>
         </template>
         <Colaboradores/>
       </b-tab>
@@ -68,7 +68,15 @@ export default {
 <style>
   *, *:before, *:after {
     box-sizing: border-box;
+    -webkit-touch-callout: none;  /* iPhone OS, Safari */
+    -webkit-user-select: none;    /* Chrome, Safari 3 */
+    -khtml-user-select: none;     /* Safari 2 */
+    -moz-user-select: none;       /* Firefox */
+    -ms-user-select: none;        /* IE10+ */
+    user-select: none;            /* Possível implementação no futuro */
+    cursor: default;
   }
+  
 
   .tabs {
     width: 100%;

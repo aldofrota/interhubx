@@ -1,9 +1,9 @@
 <template>
   <div class="main--painel">
     <div class="card--painel" v-for="dado in dados" :key="dado.dia">
-      <div class="card--conteudo">
-        <i class="titulo--card"><span>Dia</span>{{ dado.dia }}</i>
-        <i>Teve {{ dado.qtde }} <span v-if="dado.qtde === 1"> ordem aberta</span><span v-else >ordens abertas</span></i>
+      <div class="titulo--card"><p><span>Dia</span>{{ dado.dia }}</p></div>
+      <div class="descricao--card">
+        <p>Teve {{ dado.qtde }} <span v-if="dado.qtde === 1"> ordem aberta</span><span v-else >ordens abertas</span></p>
       </div>
     </div>
   </div>
@@ -57,25 +57,39 @@ export default {
     height: 150px;
     background-color: #f5f5f5;
     color: #252525;
-    border-radius: 50px;
-    background: linear-gradient(145deg, #ffffff, #dddde6);
-    box-shadow:  20px 20px 50px #d0d0d9,
-                -20px -20px 60px #ffffff;
+    border-radius: 10px;
     margin: 10px;
   }
-  .card--conteudo {
+  .titulo--card {
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-  .card--conteudo i {
-    font-size: 20px;
-    margin-top: 10px;
+    justify-content: center;
     text-align: center;
+    width: 100%;
+    height: 30%;
+    background-color: #c4bebe;
+    color: #252525;
+    border-radius: 10px 10px 0 0;
   }
-  .card--conteudo .titulo--card span {
+  .titulo--card p {
+    margin-top: 20px;
+    font-weight: 500;
+  }
+  .titulo--card span {
     margin-right: 5px;
   }
 
+  .descricao--card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: 70%;
+    color: #252525;
+    border-radius: 0 0 10px 10px;
+  }
 
 </style>

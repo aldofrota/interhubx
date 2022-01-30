@@ -1,38 +1,22 @@
 <template>
   <div class="main--telacolaborador">
-    <div class="lista--ordens"> 
-      <div class="ordem" v-for="ordem in filtroOrdens" :key="ordem.id">
-
-        <div class="titulo--ordem"><span>{{ ordem.titulo }}</span></div>
-
-        <div class="colaborador--ordem"><span>Colaborador: </span><i>{{ ordem.colaborador }}</i></div>
-
-        <div class="cliente--ordem"><span>Cliente:</span><i>{{ ordem.cliente }}</i></div>
-
-        <div class="status--ordem"><span>Status: </span><i>{{ ordem.status }}</i></div>
-
-
-        <div class="footer--ordem">
-          <div class="data--ordem"><span>Aberta em </span>{{ ordem.data }}</div>
-
-          <!-- Modal de descrição os elementos -->
-          <b-button class="btn--ordem" @click="$bvModal.show('modal' + ordem.id)"> + detalhes </b-button>
-
-          <b-modal :id="'modal' + ordem.id" hide-footer size="sm" title="Descrição" no-close-on-backdrop>
-              <div class="modal--descricao">
-                <div>{{ ordem.descricao }}</div>
-
-                <div class="latlon">
-                  <div class="latlon--ordem"><span>Latitude:</span><i>{{ ordem.latitude }}</i></div>
-                  <div class="latlon--ordem"><span>Longitude: </span><i>{{ ordem.longitude }}</i></div>
-                </div>
-                
-                <div class="footer--modal">
-                  <b-button @click="finalizarOrdem(ordem.id)" v-if="ordem.status === 'Aberta'" >Finalizar Ordem</b-button>
-                </div>
-              </div>
-          </b-modal>
+    <div class="titulo--page">
+      <h1><b-icon class="icone" icon="file-earmark"/>Ordens de serviços em Aberto</h1>
+    </div>
+    <div class="ordens--colaborador">
+      <div class="ordem" v-for="ordem in ordensUsuario" :key="ordem.id">
+        <div class="titulo--os">{{ ordem.titulo }}</div>
+        <div class="cliente--os"><span>Cliente:</span>{{ ordem.cliente }}</div>
+        <div class="data--os"><span>Aberta em</span>{{ ordem.data }}</div>
+        <div class="div--detalhes">
+          <b-button class="btn--detalhes" @click="$bvModal.show('ordem' + ordem.id)">+ Detalhes</b-button>
         </div>
+        <b-modal :id="'ordem' + ordem.id" title="Descrição" hide-footer size="sm" no-close-on-backdrop>
+          <div class="descricao--os">{{ ordem.descricao }}</div>
+          <div class="btn--finalizar">
+            <b-button @click="finalizarOrdem(ordem.id)">Finalizar O.S.</b-button>
+          </div>
+        </b-modal>
       </div>
     </div>
 
@@ -91,36 +75,256 @@ export default {
   
   data() {
     return {
+
+      modalAdicionar: false, //modal de adicionar novas ordens
+
+      usuario: {
+        nome: '',
+        perfil: ''
+      },
+
+      // Objeto que será enviado para o servidor para cadastrar nova ordem
       ordem: {
         titulo: '',
         descricao: '',
         colaborador: '',
         cliente: '',
-        status: '',
         latitude: '',
-        longitude: '',
-        data: ''
+        longitude: ''
       },
-      modalAdicionar: false,
-      colaboradores: [],
-      clientes: [],
-      filtroOrdens: [],
-      ordens: [
-        {
-          id: 1,
-          titulo: 'Ordem de serviço 1',
-          colaborador: 'João',
-          cliente: 'Cliente 1',
-          status: 'Aberta',
-          latitude: '-23.564',
-          longitude: '-46.654',
-          data: '01/01/2019',
-          descricao: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget consectetur tempor, nisi nisl euismod nunc, eget consectetur nisl nisl euismod nunc. Donec euismod, nisl eget consectetur tempor, nisi nisl euismod nunc, eget consectetur nisl nisl euismod nunc. Donec euismod, nisl eget consectetur tempor, nisi nisl euismod nunc, eget consectetur nisl nisl euismod nunc. Donec euismod, nisl eget consectetur tempor, nisi nisl euismod nunc, eget consectetur nisl nisl euismod nunc. Donec euismod, nisl eget consectetur tempor, nisi nisl euismod nunc, eget consectetur nisl nisl euismod nunc. Donec euismod, nisl eget consectetur tempor, nisi nisl euismod nunc, eget consectetur nisl nisl euismod nunc. Donec euismod,'
-        }
-        
-      ]
+
+      ordens: [], // Array de ordens de serviço
+      clientes: [], // Array de clientes
+      colaboradores: [] // Array de colaboradores
+      
+
     }
+  },
+
+  methods: {
+
+    limparForm() {
+      this.ordem.titulo = '';
+      this.ordem.descricao = '';
+      this.ordem.colaborador = '';
+      this.ordem.cliente = '';
+      this.ordem.latitude = '';
+      this.ordem.longitude = '';
+    },
+
+    abrirModal() {
+      this.modalAdicionar = !this.modalAdicionar;
+      this.getLocation()
+    },
+
+    getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(this.showPosition)
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
+    },
+
+    showPosition(position) {
+      this.ordem.latitude = position.coords.latitude
+      this.ordem.longitude = position.coords.longitude
+    },
+
+    async listarOrdens() {
+      const response = await this.$axios.get('ordens').then(response => {
+
+        this.ordens = response.data
+
+      }).catch(erro => {
+        console.log(erro)
+      });
+    },
+
+    // Função para fazer a busca e listar os colaboradores cadastrados no banco
+    async listarColaboradores() {
+      const response = await this.$axios.get('colaboradores').then(response => {
+
+        this.colaboradores = response.data
+      }).catch(erro => {
+        console.log(erro)
+      });
+    },
+
+    // Função para fazer a busca e listar os clientes cadastrados no banco
+    async listarClientes() {
+      const response = await this.$axios.get('clientes').then(response => {
+        this.clientes = response.data
+      }).catch(erro => {
+        console.log(erro)
+      });
+    },
+
+    // Função para criar uma nova ordem de serviço
+    async novaOrdem(event) {
+      event.preventDefault()
+
+      if(this.ordem.titulo != '') {
+        await this.$axios.post('registroordem', {
+
+          titulo: this.ordem.titulo,
+          descricao: this.ordem.descricao,
+          colaborador: this.ordem.colaborador,
+          cliente: this.ordem.cliente,
+          latitude: this.ordem.latitude,
+          longitude: this.ordem.longitude,
+          status: 'Aberta',
+          usuario: this.usuario.nome
+
+        })
+
+        this.listarOrdens()
+        this.limparForm()
+
+        this.$bvToast.toast('Ordem cadastrada com sucesso', {
+          title: 'Usuário cadastrado',
+          variant: 'success',
+          autoHideDelay: 2000,
+          solid: true
+        })
+
+        this.modalAdicionar = !this.modalAdicionar;
+      
+      } else {
+        return
+      }
+    },
+
+    // Função para atualizar a ordem de serviço para finalizada
+    async finalizarOrdem(ordem) {
+      await this.$axios.put('ordem', {
+        id: ordem,
+        status: 'Finalizada'
+      })
+
+      this.$bvModal.hide('ordem' + ordem)
+      this.listarOrdens()
+
+      this.$bvToast.toast('Ordem finalizada com sucesso', {
+        title: 'Ordem finalizada',
+        variant: 'success',
+        autoHideDelay: 2000,
+        solid: true
+      })
+    },
+  },
+
+  mounted() {
+
+    // Pegando o nome do usuário logado no sistema
+    if (localStorage.nome) {
+      this.usuario.nome = localStorage.nome
+    }
+    if (localStorage.perfil) {
+      this.usuario.perfil = localStorage.perfil
+    }
+
+    this.listarOrdens()
+    this.listarColaboradores()
+    this.listarClientes()
+
+    console.log(this.usuario.nome)
+  },
+
+  computed: {
+
+    // Função para filtrar as ordens de serviço do colaborador logado no sistema
+    ordensUsuario() {
+
+      let valores = []
+      console.log(this.usuario.nome)
+
+      valores = this.ordens.filter((item) => {
+        return item.colaborador === this.usuario.nome
+      })
+
+      valores = valores.filter((item) => {
+        return item.status === 'Aberta'
+      })
+
+      return valores
+    }
+
   }
+
+  
 
 }
 </script>
+
+<style>
+
+  .titulo--page  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 30px auto;
+    font-family: 'Roboto', sans-serif;
+  }
+  .titulo--page h1 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #252525;
+    background-color: #f5f5ff55;
+    padding: 10px;
+    border-radius: 5px;
+    background: #f5f5ff;
+    box-shadow: inset 20px 20px 60px #d0d0d9,
+            inset -20px -20px 60px #ffffff;
+  }
+
+  .ordens--colaborador {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ordens--colaborador .ordem {
+    height: 250px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #f5f5f5;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #dddddd, #ffffff);
+    box-shadow:  20px 20px 60px #d0d0d0,
+                -20px -20px 60px #ffffff;
+  }
+  .ordem .titulo--os {
+    font-weight: bold;
+  }
+  .ordem .cliente--os span {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  .ordem .data--os span {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  .ordem .div--detalhes {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .ordem .btn--detalhes {
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  .descricao--os {
+    margin: 20px 0;
+  }
+  .btn--finalizar {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+</style>

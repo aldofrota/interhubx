@@ -3,7 +3,7 @@ export default {
   head: {
     title: 'Interhubx',
     htmlAttrs: {
-      lang: 'pt-br'
+      lang: 'pt-BR'
     },
     meta: [
       { charset: 'utf-8' },
@@ -52,7 +52,9 @@ export default {
       'TabsPlugin',
       'ModalPlugin',
       'FormSelectPlugin',
-      'PopoverPlugin'
+      'PopoverPlugin',
+      'PaginationPlugin',
+      'TablePlugin'
     ]
   },
 

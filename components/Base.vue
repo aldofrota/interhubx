@@ -31,47 +31,42 @@
       </div>
     </div>
 
-    <!-- Div onde fica a tabela com as ordens de serviços abertas -->
+    <!-- Div onde fica os elementos dos cards listados -->
     <div class="lista--ordens"> 
-      <div class="tabela">
-        <b-table
-          id="my-list"
-          sticky-header="500px"
-          responsive
-          hover
-          striped
-          ref="tblOrdens"
-          :items="filtroOrdens"
-          :fields="fields"
-          :per-page="perPage"
-          :current-page="currentPage"
-          selectable
-          clearSelected
-          @row-clicked="rowClicked($event)"
-        ></b-table>
-      </div>
-      <div class="paginacao">
-        <b-pagination
-          align="center"
-          v-model="currentPage"
-          :total-rows="rows"
-          :per-page="perPage"
-          aria-controls="my-list"
-          pills
-        ></b-pagination>
-      </div>
-    </div>
+      <div class="ordem" v-for="ordem in filtroOrdens" :key="ordem.id">
 
-    <!-- Modal de detalhes da ordem de serviço -->
-    <b-modal id="modalDescricao" hide-footer size="sm" title="Descrição" no-close-on-backdrop>
-      <div class="modal--descricao">
-        <div class="descricao">{{ ordemModal.descricao }}</div>
+        <div class="titulo--ordem"><span>{{ ordem.titulo }}</span></div>
 
-        <div class="autor">
-          <div><span>O.S. foi aberta por:</span><i>{{ ordemModal.autor }}</i></div>
+        <div class="colaborador--ordem"><span>Colaborador: </span><i>{{ ordem.colaborador }}</i></div>
+
+        <div class="cliente--ordem"><span>Cliente:</span><i>{{ ordem.cliente }}</i></div>
+
+        <div class="status--ordem"><span>Status: </span><i>{{ ordem.status }}</i></div>
+
+
+        <div class="footer--ordem">
+          <div class="data--ordem"><span>Aberta em </span>{{ ordem.data }}</div>
+
+          <!-- Modal de descrição os elementos -->
+          <b-button class="btn--ordem" @click="$bvModal.show('modal' + ordem.id)"> + detalhes </b-button>
+
+          <b-modal :id="'modal' + ordem.id" hide-footer size="sm" title="Descrição" no-close-on-backdrop>
+              <div class="modal--descricao">
+                <div>{{ ordem.descricao }}</div>
+
+                <div class="latlon">
+                  <div class="latlon--ordem"><span>Latitude:</span><i>{{ ordem.latitude }}</i></div>
+                  <div class="latlon--ordem"><span>Longitude: </span><i>{{ ordem.longitude }}</i></div>
+                </div>
+                
+                <div class="footer--modal">
+                  <b-button @click="finalizarOrdem(ordem.id)" v-if="ordem.status === 'Aberta'" >Finalizar Ordem</b-button>
+                </div>
+              </div>
+          </b-modal>
         </div>
       </div>
-    </b-modal>
+    </div>
 
     <!-- Div onde fica o botão flutuante -->
     <div
@@ -133,19 +128,11 @@ export default {
   data() {
     return {
 
-      perPage: 10,
-      currentPage: 1,
-
       ordenaCliente: false,      //método para ordenar por cliente
       ordenaColaborador: false, //método para fazer a ordenação por colaborador
       ordenaData: false,       // método para fazer a ordenação pela data
 
       modalAdicionar: false, //modal de adicionar novas ordens
-      
-      usuario: {
-        nome: '',
-        perfil: ''
-      },
 
       // Objeto que ultilazara para filtrar os dados
       filtro: {
@@ -166,46 +153,15 @@ export default {
         longitude: ''
       },
 
-      ordemModal: [], //insformações que seram passada para o modal de descrição
-
       // Array de objetos que carrega os dados do banco
       ordens:[],
       colaboradores:[],
       clientes:[],
 
-      fields: [
-        {
-          key: 'data',
-          label: 'Data'
-        },
-        {
-          key: 'titulo',
-          label: 'Titulo'
-        },
-        {
-          key: 'colaborador',
-          label: 'Colaborador'
-        },
-        {
-          key: 'cliente',
-          label: 'Cliente'
-        },
-        {
-          key: 'status',
-          label: 'Status',
-        }
-      ],
     }
   },
 
   methods: {
-
-    rowClicked(ordem) {
-      this.$bvModal.show('modalDescricao')
-      this.$refs['tblOrdens'].clearSelected()
-
-      this.ordemModal = ordem
-    },
 
     // Método que faz o tratamento da data para fazer o filtro por periodo
     converteData(data = new Date()) {
@@ -361,7 +317,6 @@ export default {
           latitude: this.ordem.latitude,
           longitude: this.ordem.longitude,
           status: 'Aberta',
-          usuario: this.usuario.nome,
 
         })
 
@@ -383,9 +338,20 @@ export default {
     },
 
     async finalizarOrdem(ordem) {
+      await this.$axios.put('ordem', {
+        id: ordem,
+        status: 'Finalizada'
+      })
 
       this.$bvModal.hide('modal' + ordem)
       this.listarOrdens()
+
+      this.$bvToast.toast('Ordem finalizada com sucesso', {
+        title: 'Ordem finalizada',
+        variant: 'success',
+        autoHideDelay: 2000,
+        solid: true
+      })
     },
       
   },
@@ -395,21 +361,10 @@ export default {
     this.listarOrdens()
     this.listarColaboradores()
     this.listarClientes()
-
-    if (localStorage.nome) {
-      this.usuario.nome = localStorage.nome
-    }
-    if (localStorage.perfil) {
-      this.usuario.perfil = localStorage.perfil
-    }
     
   },
 
   computed: {
-
-    rows() {
-        return this.filtroOrdens.length
-    },
 
     // Método para fazer o filtro dos registros de Ordem de Serviço
     filtroOrdens() {
@@ -557,37 +512,103 @@ export default {
   }
 
   /* Css do modal de descrição da ordem de serviço */
-  .modal--descricao .descricao {
-    margin-bottom: 15px;
+  .modal--descricao {
+    /*  */
   }
-  .modal--descricao .autor span{
-    font-size: 14px;
+  .modal--descricao .latlon {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+  }
+  .modal--descricao .footer--modal {
+    margin-top: 15px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Css dos cards de Ordem de serviço */
+  .lista--ordens{
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .lista--ordens .ordem {
+    height: 300px;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 10px 20px 40px 10px;
+    border-radius: 5px;
+    background: linear-gradient(225deg, #ffffff, #dddddd);
+    box-shadow:  -20px 20px 60px #d0d0d0,
+             20px -20px 60px #ffffff;
+  }
+
+  .titulo--ordem {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    font-weight: bold;
+    color: #252525;
+  }
+
+  .colaborador--ordem {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .colaborador--ordem span {
+    color: #252525;
     font-weight: bold;
     margin-right: 10px;
   }
 
-  /* Css dos cards de Ordem de serviço */
-  
-  .lista--ordens {
+  .cliente--ordem {
     display: flex;
-    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
   }
-  .lista--ordens .tabela {
-    height: 500px;
-    width: 98vw;
-  }
-  .page-link {
+  .cliente--ordem span {
     color: #252525;
+    font-weight: bold;
+    margin-right: 10px;
   }
-  .page-link:hover {
+
+  .status--ordem {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .status--ordem span {
     color: #252525;
+    font-weight: bold;
+    margin-right: 10px;
   }
-  .page-item {
-    color: #252525 !important;
+  .footer--ordem {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
   }
-  .page-item.active .page-link {
-    background-color: #252525;
-    border-color: #f5f5f5;
+  .footer--ordem .data--ordem {
+    font-size: 12px;
+  }
+  .footer--ordem .data--ordem span {
+    color: #252525;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  .footer--ordem .btn--ordem {
+    height: 30px;
+    width: 70px;
+    font-size: 12px;
+    padding: 0;
+    margin-right: 5px;
   }
 
   /* Css do modal de adicionar uma nova ordem */

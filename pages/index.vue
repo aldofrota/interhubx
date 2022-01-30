@@ -3,7 +3,10 @@
     <div>
       <NavMenu/>
     </div>
-    <b-tabs class="tabs mt-2" content-class="mt-3" small pills justified>
+    <div class="colaborador" v-if="usuario.perfil === 'colaborador'">
+      <TelaColaborador/>
+    </div>
+    <b-tabs class="tabs mt-2" content-class="mt-3" small pills justified v-if="usuario.perfil === 'coordenador'">
       <b-tab active>
         <template class="aba" #title>
           <b-icon class="icone" icon="clipboard-data"/><span class="nome">Painel</span>

@@ -3,7 +3,7 @@
     <div class="card--painel" v-for="dado in dados" :key="dado.dia">
       <div class="titulo--card"><p><span>Dia</span>{{ dado.dia }}</p></div>
       <div class="descricao--card">
-        <p>Teve {{ dado.qtde }} <span v-if="dado.qtde === 1"> ordem aberta</span><span v-else >ordens abertas</span></p>
+        <p>{{ dado.qtde }} <span v-if="dado.qtde === 1"> ordem aberta</span><span v-else >ordens abertas</span></p>
       </div>
     </div>
   </div>

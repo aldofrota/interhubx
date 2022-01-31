@@ -224,6 +224,8 @@ export default {
     abrirModal() {
       this.modalAdicionar = !this.modalAdicionar;
       this.getLocation()
+      this.listarColaboradores()
+      this.listarClientes()
     },
 
     // Método para limpar os filtros

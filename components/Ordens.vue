@@ -70,6 +70,9 @@
         <div class="autor">
           <div><span>O.S. foi aberta por:</span><i>{{ ordemModal.autor }}</i></div>
         </div>
+        <div class="btn--finalizar">
+          <b-button v-if="ordemModal.status === 'Aberta'" @click="finalizarOrdem(ordemModal.id)">Finalizar O.S.</b-button>
+        </div>
       </div>
     </b-modal>
 
@@ -217,6 +220,7 @@ export default {
       return novaData;
     },
 
+    // Método para abrir o modal de adicionar ordem de serviço
     abrirModal() {
       this.modalAdicionar = !this.modalAdicionar;
       this.getLocation()
@@ -383,9 +387,36 @@ export default {
     },
 
     async finalizarOrdem(ordem) {
+      
+      try {
+        await this.$axios.put('ordem', {
+          id: ordem,
+          status: 'Finalizada'
+        })
 
-      this.$bvModal.hide('modal' + ordem)
-      this.listarOrdens()
+        this.$bvModal.hide('modalDescricao')
+        this.listarOrdens()
+
+        this.$bvToast.toast('Ordem finalizada com sucesso', {
+          title: 'Ordem finalizada',
+          variant: 'success',
+          autoHideDelay: 2000,
+          solid: true
+
+        })
+   
+      } catch (error) {
+
+        this.$bvModal.hide('modalDescricao')
+        this.listarOrdens()
+
+        this.$bvToast.toast('Erro, Ordem não atualizada', {
+          title: 'Erro',
+          variant: 'warning',
+          autoHideDelay: 3000,
+          solid: true
+        })
+      }
     },
       
   },

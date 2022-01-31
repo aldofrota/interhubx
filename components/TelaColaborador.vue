@@ -196,20 +196,36 @@ export default {
 
     // Função para atualizar a ordem de serviço para finalizada
     async finalizarOrdem(ordem) {
-      await this.$axios.put('ordem', {
-        id: ordem,
-        status: 'Finalizada'
-      })
+      
+      try {
+        await this.$axios.put('ordem', {
+          id: ordem,
+          status: 'Finalizada'
+        })
 
-      this.$bvModal.hide('ordem' + ordem)
-      this.listarOrdens()
+        this.$bvModal.hide('modalDescricao')
+        this.listarOrdens()
 
-      this.$bvToast.toast('Ordem finalizada com sucesso', {
-        title: 'Ordem finalizada',
-        variant: 'success',
-        autoHideDelay: 2000,
-        solid: true
-      })
+        this.$bvToast.toast('Ordem finalizada com sucesso', {
+          title: 'Ordem finalizada',
+          variant: 'success',
+          autoHideDelay: 2000,
+          solid: true
+
+        })
+   
+      } catch (error) {
+
+        this.$bvModal.hide('modalDescricao')
+        this.listarOrdens()
+
+        this.$bvToast.toast('Erro, Ordem não atualizada', {
+          title: 'Erro',
+          variant: 'warning',
+          autoHideDelay: 3000,
+          solid: true
+        })
+      }
     },
   },
 
